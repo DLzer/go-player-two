@@ -12,7 +12,6 @@ import (
 )
 
 func main() {
-
 	var addr = flag.String("addr", "40000", "http service address")
 
 	http.HandleFunc("/engine", engineHandler)
