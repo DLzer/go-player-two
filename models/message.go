@@ -12,6 +12,7 @@ const (
 	GameEndMessage        = 1002
 	PositionUpdateMessage = 1003
 	ScoreUpdateMessage    = 1004
+	MatchFoundMessage     = 1005
 )
 
 // SocketMessage ..
@@ -45,8 +46,20 @@ func (msg *SocketMessage) ToBytes() (returnMsg []byte) {
 	return
 }
 
-// ToSocketBytes returns the game start message to socket message in bytes
-func (msg *GameStart) ToSocketBytes() []byte {
+func (msg *MatchFound) MatchFoundMessageToBytes() []byte {
+	matchFoundBytes, err := json.Marshal(msg)
+	if err != nil {
+		matchFoundBytes = []byte(err.Error())
+	}
+	sm := SocketMessage{
+		Type:    MatchFoundMessage,
+		Message: matchFoundBytes,
+	}
+	return sm.ToBytes()
+}
+
+// GameStartMessageToBytes returns the game start message to socket message in bytes
+func (msg *GameStart) GameStartMessageToBytes() []byte {
 	gameStartBytes, err := json.Marshal(msg)
 	if err != nil {
 		gameStartBytes = []byte(err.Error())
@@ -54,6 +67,19 @@ func (msg *GameStart) ToSocketBytes() []byte {
 	sm := SocketMessage{
 		Type:    GameStartMessage,
 		Message: gameStartBytes,
+	}
+	return sm.ToBytes()
+}
+
+// GameEndMessageToSocket returns the game end message to socket message in bytes
+func (msg *GameEnd) GameEndMessageToSocket() []byte {
+	gameEndBytes, err := json.Marshal(msg)
+	if err != nil {
+		gameEndBytes = []byte(err.Error())
+	}
+	sm := SocketMessage{
+		Type:    GameEndMessage,
+		Message: gameEndBytes,
 	}
 	return sm.ToBytes()
 }

@@ -4,6 +4,8 @@ import (
 	"log"
 	"sync"
 	"time"
+
+	"github.com/DLzer/go-player-two/models"
 )
 
 type GameServer struct {
@@ -69,8 +71,16 @@ func (s *GameServer) MatchMaking() {
 		p1 := <-s.matchmaking
 		p2 := <-s.matchmaking
 
-		p1Err := p1.Send([]byte("match found"))
-		p2Err := p2.Send([]byte("match found"))
+		p1MatchFound := models.MatchFound{
+			MatchFound: "match found",
+		}
+
+		p2MatchFound := models.MatchFound{
+			MatchFound: "match found",
+		}
+
+		p1Err := p1.Send(p1MatchFound.MatchFoundMessageToBytes())
+		p2Err := p2.Send(p2MatchFound.MatchFoundMessageToBytes())
 
 		if p1Err != nil && p2Err != nil {
 			continue

@@ -7,3 +7,7 @@ type GameStart struct {
 type GameEnd struct {
 	Winner string `json:"winner"`
 }
+
+type MatchFound struct {
+	MatchFound string `json:"match_found"`
+}

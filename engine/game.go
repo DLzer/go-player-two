@@ -32,7 +32,7 @@ func NewGame(p1 *Player, p2 *Player) *Game {
 	initializePlayerOne := models.GameStart{
 		OpponentName: p2.Name,
 	}
-	if err := p1.Send(initializePlayerOne.ToSocketBytes()); err != nil {
+	if err := p1.Send(initializePlayerOne.GameStartMessageToBytes()); err != nil {
 		log.Fatal(err)
 	}
 
@@ -40,7 +40,7 @@ func NewGame(p1 *Player, p2 *Player) *Game {
 	initializePlayerTwo := models.GameStart{
 		OpponentName: p1.Name,
 	}
-	if err := p2.Send(initializePlayerTwo.ToSocketBytes()); err != nil {
+	if err := p2.Send(initializePlayerTwo.GameStartMessageToBytes()); err != nil {
 		log.Fatal(err)
 	}
 
@@ -63,16 +63,22 @@ BREAK:
 
 		// Handle exit messages
 		case <-g.PlayerOne.Exit:
+			iP1 := models.GameEnd{
+				Winner: g.PlayerOne.Name,
+			}
 			log.Println(g.PlayerOne.Name, " has exited the game")
-			if err := g.PlayerTwo.Send(getGameEndMessage(g.PlayerTwo.Name)); err != nil {
+			if err := g.PlayerTwo.Send(iP1.GameEndMessageToSocket()); err != nil {
 				log.Fatal(err)
 			}
 			go g.PlayerTwo.Close()
 			break BREAK
 
 		case <-g.PlayerTwo.Exit:
+			iP2 := models.GameEnd{
+				Winner: g.PlayerTwo.Name,
+			}
 			log.Println(g.PlayerTwo.Name, " has exited the game")
-			if err := g.PlayerOne.Send(getGameEndMessage(g.PlayerOne.Name)); err != nil {
+			if err := g.PlayerOne.Send(iP2.GameEndMessageToSocket()); err != nil {
 				log.Fatal(err)
 			}
 			go g.PlayerOne.Close()
@@ -125,16 +131,4 @@ func handlePositionUpdate(msg *models.SocketMessage, player *Player, opponent *P
 	if err := opponent.Send(msg.ToBytes()); err != nil {
 		log.Fatal(err)
 	}
-}
-
-func getGameEndMessage(winner string) []byte {
-	gW := models.GameEnd{
-		Winner: winner,
-	}
-	winMessage, _ := json.Marshal(gW)
-	msg := models.SocketMessage{
-		Type:    models.GameEndMessage,
-		Message: winMessage,
-	}
-	return msg.ToBytes()
 }
