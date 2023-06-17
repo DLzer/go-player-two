@@ -14,6 +14,7 @@ make aserver
 
 Make a new client to test the server. Two clients makes a party.
 ```bash
+make aclient
 >> Starting Client...
 ```
 
