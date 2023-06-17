@@ -17,6 +17,7 @@ const (
 	GameEndMessage        = 1002
 	PositionUpdateMessage = 1003
 	ScoreUpdateMessage    = 1004
+	MatchFoundMessage     = 1005
 	wsServerEndpoint      = "ws://localhost:40000/engine"
 	dataSendTickRate      = 100
 )
@@ -48,25 +49,46 @@ func main() {
 			fmt.Println("WS unmarshal error", err)
 		}
 
+		var gameMessage interface{}
+
 		switch msg.Type {
 		case Ping:
 			fmt.Println("received ping from server")
+		case MatchFoundMessage:
+			fmt.Println("received match found message")
+			if err := json.Unmarshal(m, &gameMessage); err != nil {
+				fmt.Println("WS unmarshal error", err)
+			}
+			fmt.Printf("msg: %+v\n", gameMessage)
 		case GameStartMessage:
 			fmt.Println("received game start message")
-			fmt.Printf("msg: %+v\n", msg.Message)
+			if err := json.Unmarshal(m, &gameMessage); err != nil {
+				fmt.Println("WS unmarshal error", err)
+			}
+			fmt.Printf("msg: %+v\n", gameMessage)
 		case GameEndMessage:
 			fmt.Println("received game end message")
-			fmt.Printf("msg: %+v\n", msg.Message)
+			if err := json.Unmarshal(m, &gameMessage); err != nil {
+				fmt.Println("WS unmarshal error", err)
+			}
+			fmt.Printf("msg: %+v\n", gameMessage)
 			conn.Close()
+			break
 		case PositionUpdateMessage:
-			fmt.Println("received position update message")
-			fmt.Printf("msg: %+v\n", msg.Message)
+			if err := json.Unmarshal(m, &gameMessage); err != nil {
+				fmt.Println("WS unmarshal error", err)
+			}
+			fmt.Printf("msg: %+v\n", gameMessage)
 		case ScoreUpdateMessage:
-			fmt.Println("received score update message")
-			fmt.Printf("msg: %+v\n", msg.Message)
+			if err := json.Unmarshal(m, &gameMessage); err != nil {
+				fmt.Println("WS unmarshal error", err)
+			}
+			fmt.Printf("msg: %+v\n", gameMessage)
 		default:
-			fmt.Println("received message we do not know")
-			fmt.Printf("msg: %+v\n", msg.Message)
+			if err := json.Unmarshal(m, &gameMessage); err != nil {
+				fmt.Println("WS unmarshal error", err)
+			}
+			fmt.Printf("msg: %+v\n", gameMessage)
 		}
 	}
 }
