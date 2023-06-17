@@ -22,6 +22,25 @@ const (
 	dataSendTickRate      = 100
 )
 
+// SocketMessage ..
+type SocketMessage struct {
+	Type    int             `json:"type"`
+	Message json.RawMessage `json:"msg"`
+}
+
+// Position represents the individual players position in the game
+type Position struct {
+	X int `json:"x"`
+	Y int `json:"y"`
+}
+
+// PlayerState represents the individuals player state in the game
+type PlayerState struct {
+	Health     float64  `json:"health"`
+	Position   Position `json:"position"`
+	IsOpponent bool     `json:"is_opp"`
+}
+
 func main() {
 	dialer := websocket.Dialer{
 		ReadBufferSize:  1024,
@@ -73,7 +92,6 @@ func main() {
 			}
 			fmt.Printf("msg: %+v\n", gameMessage)
 			conn.Close()
-			break
 		case PositionUpdateMessage:
 			if err := json.Unmarshal(m, &gameMessage); err != nil {
 				fmt.Println("WS unmarshal error", err)
