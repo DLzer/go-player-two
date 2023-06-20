@@ -8,7 +8,7 @@ type Position struct {
 
 // PlayerState represents the individuals player state in the game
 type PlayerState struct {
-	Health     float64  `json:"health"`
+	Health     int      `json:"health"`
 	Position   Position `json:"position"`
 	IsOpponent bool     `json:"is_opp"`
 }
