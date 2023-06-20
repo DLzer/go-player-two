@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
+	"time"
 
 	"github.com/DLzer/go-player-two/models"
 	"github.com/google/uuid"
@@ -36,7 +38,7 @@ type Position struct {
 
 // PlayerState represents the individuals player state in the game
 type PlayerState struct {
-	Health     float64  `json:"health"`
+	Health     int      `json:"health"`
 	Position   Position `json:"position"`
 	IsOpponent bool     `json:"is_opp"`
 }
@@ -108,5 +110,30 @@ func main() {
 			}
 			fmt.Printf("msg: %+v\n", gameMessage)
 		}
+
+		state := &PlayerState{
+			Health: rand.Intn(100),
+			Position: Position{
+				X: rand.Intn(100),
+				Y: rand.Intn(100),
+			},
+			IsOpponent: true,
+		}
+
+		j, err := json.Marshal(state)
+		if err != nil {
+			fmt.Println("Marshal Error:", err)
+		}
+
+		msg := &SocketMessage{
+			Type:    PositionUpdateMessage,
+			Message: j,
+		}
+		err = conn.WriteJSON(msg)
+		if err != nil {
+			fmt.Println("Write Error:", err)
+		}
+
+		time.Sleep(1 * time.Second)
 	}
 }
