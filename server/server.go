@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -15,8 +16,15 @@ func main() {
 	var addr = flag.String("addr", "40000", "http service address")
 
 	http.HandleFunc("/engine", engineHandler)
-	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
 		fmt.Fprintf(w, "running")
+	})
+	http.HandleFunc("/stats", func(w http.ResponseWriter, _ *http.Request) {
+		res, err := json.Marshal(engine.GS.GetStats())
+		if err != nil {
+			w.Write([]byte("error"))
+		}
+		w.Write(res)
 	})
 
 	server := &http.Server{

@@ -64,6 +64,15 @@ func (s *GameServer) RemoveGame(gameName string, g *Game) {
 	delete(s.games, gameName)
 }
 
+// GetStats returns a map of stats from the game server
+func (s *GameServer) GetStats() map[string]int {
+	return map[string]int{
+		"games":   len(s.games),
+		"players": len(s.clients),
+		"status":  200,
+	}
+}
+
 // MatchMaking will attempt to find a matching player connection
 func (s *GameServer) MatchMaking() {
 	log.Println("starting matchmaking")
