@@ -26,7 +26,7 @@ func NewGame(p1 *Player, p2 *Player) *Game {
 	}
 	// Game is starting, check player connections
 	go game.RouteMessage()
-	go game.RouteMessage()
+	// go game.RouteMessage()
 
 	// Sending game start signal
 	initializePlayerOne := models.GameStart{
@@ -70,6 +70,7 @@ BREAK:
 			if err := g.PlayerTwo.Send(iP1.GameEndMessageToSocket()); err != nil {
 				log.Fatal(err)
 			}
+			log.Println("Sent GameEndMesage to P2")
 			go g.PlayerTwo.Close()
 			break BREAK
 
@@ -81,6 +82,7 @@ BREAK:
 			if err := g.PlayerOne.Send(iP2.GameEndMessageToSocket()); err != nil {
 				log.Fatal(err)
 			}
+			log.Println("Sent GameEndMesage to P1")
 			go g.PlayerOne.Close()
 			break BREAK
 		}

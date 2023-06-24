@@ -3,6 +3,7 @@ package engine
 import (
 	"log"
 	"sync"
+	"time"
 
 	"github.com/DLzer/go-player-two/models"
 	"github.com/gorilla/websocket"
@@ -55,6 +56,6 @@ func (p *Player) Send(msg []byte) error {
 
 // Close will exit the player session and close the connection
 func (p *Player) Close() {
-	// time.Sleep(1 * time.Second)
+	time.Sleep(1 * time.Second)
 	p.conn.Close()
 }

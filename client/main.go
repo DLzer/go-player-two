@@ -94,6 +94,7 @@ func main() {
 			}
 			fmt.Printf("msg: %+v\n", gameMessage)
 			conn.Close()
+			break
 		case PositionUpdateMessage:
 			if err := json.Unmarshal(m, &gameMessage); err != nil {
 				fmt.Println("WS unmarshal error", err)
@@ -108,7 +109,7 @@ func main() {
 			if err := json.Unmarshal(m, &gameMessage); err != nil {
 				fmt.Println("WS unmarshal error", err)
 			}
-			fmt.Printf("msg: %+v\n", gameMessage)
+			fmt.Printf("default msg: %+v\n", gameMessage)
 		}
 
 		state := &PlayerState{
