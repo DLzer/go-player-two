@@ -23,18 +23,26 @@ func main() {
 	http.HandleFunc("/stats", func(w http.ResponseWriter, _ *http.Request) {
 		res, err := json.Marshal(engine.GS.GetStats())
 		if err != nil {
-			w.Write([]byte("error"))
+			if _, err := w.Write([]byte("error")); err != nil {
+				log.Fatal(err)
+			}
 		}
 		w.Header().Add("Content-Type", "application/json")
-		w.Write(res)
+		if _, err := w.Write(res); err != nil {
+			log.Fatal(err)
+		}
 	})
 	http.HandleFunc("/stats/details", func(w http.ResponseWriter, _ *http.Request) {
 		res, err := json.Marshal(engine.GS.GetDetailedStats())
 		if err != nil {
-			w.Write([]byte("error"))
+			if _, err := w.Write([]byte("error")); err != nil {
+				log.Fatal(err)
+			}
 		}
 		w.Header().Add("Content-Type", "application/json")
-		w.Write(res)
+		if _, err := w.Write(res); err != nil {
+			log.Fatal(err)
+		}
 	})
 
 	server := &http.Server{
