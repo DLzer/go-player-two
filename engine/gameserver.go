@@ -1,11 +1,12 @@
 package engine
 
 import (
+	"fmt"
 	"log"
 	"sync"
-	"time"
 
 	"github.com/DLzer/go-player-two/models"
+	"github.com/google/uuid"
 )
 
 type GameServer struct {
@@ -13,6 +14,20 @@ type GameServer struct {
 	games       map[string]*Game
 	matchmaking chan *Player
 	mu          sync.Mutex
+}
+
+type GameServerStats struct {
+	Games         int                 `json:"games"`
+	Players       int                 `json:"players"`
+	InMatchmaking int                 `json:"in_matchmaking"`
+	Status        int                 `json:"status"`
+	Details       []GameServerDetails `json:"details,omitempty"`
+}
+
+type GameServerDetails struct {
+	GameID        string `json:"game_id"`
+	PlayerOneName string `json:"player_one_name"`
+	PlayerTwoName string `json:"player_two_name"`
 }
 
 var GS *GameServer
@@ -61,16 +76,38 @@ func (s *GameServer) RemoveGame(gameName string, g *Game) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	fmt.Println("Removing game from map: ", gameName)
 	delete(s.games, gameName)
 }
 
 // GetStats returns a map of stats from the game server
-func (s *GameServer) GetStats() map[string]int {
-	return map[string]int{
-		"games":   len(s.games),
-		"players": len(s.clients),
-		"status":  200,
+func (s *GameServer) GetStats() *GameServerStats {
+	return &GameServerStats{
+		Games:   len(s.games),
+		Players: len(s.clients),
+		Status:  200,
 	}
+}
+
+// GetStats returns a map of stats from the game server
+func (s *GameServer) GetDetailedStats() *GameServerStats {
+	gss := &GameServerStats{
+		Games:   len(s.games),
+		Players: len(s.clients),
+		Status:  200,
+	}
+
+	gsd := []GameServerDetails{}
+	for x := range s.games {
+		gsd = append(gsd, GameServerDetails{
+			GameID:        s.games[x].ID,
+			PlayerOneName: s.games[x].PlayerOne.Name,
+			PlayerTwoName: s.games[x].PlayerTwo.Name,
+		})
+	}
+
+	gss.Details = gsd
+	return gss
 }
 
 // MatchMaking will attempt to find a matching player connection
@@ -100,8 +137,9 @@ func (s *GameServer) MatchMaking() {
 			s.matchmaking <- p1
 			continue
 		} else {
-			g := NewGame(p1, p2)
-			s.AddGame("game_"+time.Now().String(), g)
+			newGameID := uuid.New().String()
+			g := NewGame("game_"+newGameID, p1, p2)
+			s.AddGame("game_"+newGameID, g)
 			continue
 		}
 	}
