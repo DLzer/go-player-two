@@ -12,15 +12,17 @@ const (
 )
 
 type Game struct {
+	ID        string
 	PlayerOne *Player
 	PlayerTwo *Player
 }
 
-func NewGame(p1 *Player, p2 *Player) *Game {
-	log.Println("starting game instance")
+func NewGame(gameID string, p1 *Player, p2 *Player) *Game {
+	log.Println("starting game instance: ", gameID)
 	p1.State.Health = StartingHealth
 	p2.State.Health = StartingHealth
 	game := Game{
+		ID:        gameID,
 		PlayerOne: p1,
 		PlayerTwo: p2,
 	}
@@ -64,30 +66,37 @@ BREAK:
 		// Handle exit messages
 		case <-g.PlayerOne.Exit:
 			iP1 := models.GameEnd{
-				Winner: g.PlayerOne.Name,
+				Winner: g.PlayerTwo.Name,
 			}
 			log.Println(g.PlayerOne.Name, " has exited the game")
 			if err := g.PlayerTwo.Send(iP1.GameEndMessageToSocket()); err != nil {
 				log.Fatal(err)
 			}
-			log.Println("Sent GameEndMesage to P2")
-			go g.PlayerTwo.Close()
+			g.SafeShutdown()
 			break BREAK
 
 		case <-g.PlayerTwo.Exit:
 			iP2 := models.GameEnd{
-				Winner: g.PlayerTwo.Name,
+				Winner: g.PlayerOne.Name,
 			}
 			log.Println(g.PlayerTwo.Name, " has exited the game")
 			if err := g.PlayerOne.Send(iP2.GameEndMessageToSocket()); err != nil {
 				log.Fatal(err)
 			}
-			log.Println("Sent GameEndMesage to P1")
-			go g.PlayerOne.Close()
+			g.SafeShutdown()
 			break BREAK
 		}
 	}
 	log.Println("Closing RouteMessage game for", g.PlayerOne.Name, " and ", g.PlayerTwo.Name)
+}
+
+// SafeShutdown safely handles removing the clients and game from the mapping pool
+func (g *Game) SafeShutdown() {
+	go g.PlayerOne.Close()
+	go g.PlayerTwo.Close()
+	GS.RemoveClient(g.PlayerTwo.Name, g.PlayerTwo)
+	GS.RemoveClient(g.PlayerOne.Name, g.PlayerOne)
+	GS.RemoveGame(g.ID, g)
 }
 
 // handleGameMove ..
