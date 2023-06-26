@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"math/rand"
-	"time"
 
 	"github.com/DLzer/go-player-two/models"
 	"github.com/google/uuid"
@@ -58,19 +56,31 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Connected to socket")
+	log.Println("Connected to socket")
+	// liveChannel := make(chan int, 1)
 
+	clientReader(conn)
+	// clientWriter(conn, liveChannel)
+
+	// close
+}
+
+func clientReader(conn *websocket.Conn) {
 	var msg models.SocketMessage
+
+BREAK:
 	for {
 		_, m, err := conn.ReadMessage()
 		if err != nil {
-			fmt.Println("WS read error", err)
+			log.Println("WS read error", err)
 		}
 		if err := json.Unmarshal(m, &msg); err != nil {
-			fmt.Println("WS unmarshal error", err)
+			log.Println("WS unmarshal error", err)
 		}
 
 		var gameMessage interface{}
+
+		fmt.Println("MESSAGE TYPE: ", msg.Type)
 
 		switch msg.Type {
 		case Ping:
@@ -94,7 +104,7 @@ func main() {
 			}
 			fmt.Printf("msg: %+v\n", gameMessage)
 			conn.Close()
-			break
+			break BREAK
 		case PositionUpdateMessage:
 			if err := json.Unmarshal(m, &gameMessage); err != nil {
 				fmt.Println("WS unmarshal error", err)
@@ -110,31 +120,44 @@ func main() {
 				fmt.Println("WS unmarshal error", err)
 			}
 			fmt.Printf("default msg: %+v\n", gameMessage)
+			break BREAK
 		}
-
-		state := &PlayerState{
-			Health: rand.Intn(100),
-			Position: Position{
-				X: rand.Intn(100),
-				Y: rand.Intn(100),
-			},
-			IsOpponent: true,
-		}
-
-		j, err := json.Marshal(state)
-		if err != nil {
-			fmt.Println("Marshal Error:", err)
-		}
-
-		msg := &SocketMessage{
-			Type:    PositionUpdateMessage,
-			Message: j,
-		}
-		err = conn.WriteJSON(msg)
-		if err != nil {
-			fmt.Println("Write Error:", err)
-		}
-
-		time.Sleep(1 * time.Second)
 	}
+	return
 }
+
+// func clientWriter(conn *websocket.Conn, liveChannel <-chan int) {
+// 	for {
+// 		running := <-liveChannel
+// 		log.Println("Channel is open: ", running)
+// 		if running == 0 {
+// 			break
+// 		}
+
+// 		state := &PlayerState{
+// 			Health: rand.Intn(100),
+// 			Position: Position{
+// 				X: rand.Intn(100),
+// 				Y: rand.Intn(100),
+// 			},
+// 			IsOpponent: true,
+// 		}
+
+// 		j, err := json.Marshal(state)
+// 		if err != nil {
+// 			fmt.Println("Marshal Error:", err)
+// 		}
+
+// 		msg := &SocketMessage{
+// 			Type:    PositionUpdateMessage,
+// 			Message: j,
+// 		}
+// 		err = conn.WriteJSON(msg)
+// 		if err != nil {
+// 			fmt.Println("Write Error:", err)
+// 		}
+
+// 		time.Sleep(1 * time.Second)
+// 	}
+// 	return
+// }
