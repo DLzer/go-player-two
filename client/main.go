@@ -123,7 +123,6 @@ BREAK:
 			break BREAK
 		}
 	}
-	return
 }
 
 // func clientWriter(conn *websocket.Conn, liveChannel <-chan int) {
