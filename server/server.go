@@ -17,6 +17,7 @@ func main() {
 
 	http.HandleFunc("/engine", engineHandler)
 	http.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(200)
 		fmt.Fprintf(w, "running")
 	})
 	http.HandleFunc("/stats", func(w http.ResponseWriter, _ *http.Request) {
@@ -24,6 +25,15 @@ func main() {
 		if err != nil {
 			w.Write([]byte("error"))
 		}
+		w.Header().Add("Content-Type", "application/json")
+		w.Write(res)
+	})
+	http.HandleFunc("/stats/details", func(w http.ResponseWriter, _ *http.Request) {
+		res, err := json.Marshal(engine.GS.GetDetailedStats())
+		if err != nil {
+			w.Write([]byte("error"))
+		}
+		w.Header().Add("Content-Type", "application/json")
 		w.Write(res)
 	})
 
